@@ -1,16 +1,19 @@
 const mongoose = require('mongoose');
 
-const company = new mongoose.Schema({
+const jobSchema = new mongoose.Schema({
     companyName: {
         type : String 
     },
-    post : {
-        type : String 
+    jobType : {
+        type : String
+    },
+    jobPosts : {
+        type : Array
     },
     description : {
         type : String 
     },
-    startData : {
+    startDate : {
         type : String 
     },
     stipend : {
@@ -25,4 +28,6 @@ const company = new mongoose.Schema({
 },
 {
    timestamps : true  
-})
+});
+
+module.exports = mongoose.model("jobs", jobSchema)

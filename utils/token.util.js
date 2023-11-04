@@ -48,6 +48,16 @@ const token = {
         next();
     });
   },
+  verifyRefreshToken : (req, res , next) => {
+    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload) =>{
+        if(err){
+            res.status(401).json({message : "Invalid Token"});
+            return; 
+        }
+        userId = payload.aud;
+        return userId;      
+    })
+  }
 };
 
 module.exports = {token};

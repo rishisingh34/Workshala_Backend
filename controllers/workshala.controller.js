@@ -1,3 +1,5 @@
+const jobs = require("../models/job.model");
+
 const workshalaCtrl = {
     dashBoard : async (req, res) => {
         try {
