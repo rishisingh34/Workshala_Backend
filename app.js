@@ -17,10 +17,9 @@ db.once( "open" , () => console.log("Database Connected"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true }));
 
-// route user sign Up 
-app.use(require("./routes/user.signUp.route"));
-// route for user login 
-app.use(require("./routes/user.login.route"));
+// route for authentication 
+app.use(require("./routes/auth.route"));
+
 // routes for workshala features
 app.use(require("./routes/workshala.route"));
 

@@ -1,3 +1,2 @@
 NODE_MODULES
 .env
-JWT_SECRET = P@ssw0rd1

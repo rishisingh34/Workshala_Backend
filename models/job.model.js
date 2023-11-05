@@ -24,6 +24,9 @@ const jobSchema = new mongoose.Schema({
     },
     applyBy : {
         type : String 
+    },
+    applicants : {
+        type : String
     }
 },
 {

@@ -1,5 +1,6 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const User = require('../models/user.model');
 
 const token = {
   signAccessToken: (id) => {
@@ -32,31 +33,49 @@ const token = {
       });
     });
   },
-  verifyAccessToken: (req, res, next) => {
-    if (!req.headers["authorization"]) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
+  verifyAccessToken:  async (req, res, next) => {
+    try {
+      if (!req.headers["authorization"]) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const authHeader = req.headers["authorization"];
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+   
+      req.user = await User.findById(decoded.aud).select("-passwd");
+      console.log(req.user)
+      next();
+    } catch (err) {
+      res.status(500).json({ message : "Internal Server Error"});
     }
-    const authHeader = req.headers["authorization"];
-    const token = authHeader.split(" ")[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET , (err, payload) => {
-        if(err){
-            res.status(500).json({ message : "Internal Server Error"});
-            return; 
-        }
-        req.payload = payload;
-        next();
-    });
   },
-  verifyRefreshToken : (req, res , next) => {
-    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload) =>{
-        if(err){
-            res.status(401).json({message : "Invalid Token"});
-            return; 
+  verifyRefreshToken : async (req, res , next) => {
+    try {
+      jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload) => {
+        if (err) {
+          res.status(401).json({ message: "Invalid Token" });
+          return;
         }
         userId = payload.aud;
-        return userId;      
-    })
+        return userId;
+      });
+    }catch (err) {
+      res.status(500).json({ message : "Internal Server Error"});
+    }
+  },
+  verifyResetPasswordToken : async (req, res, next) => {
+    try {
+      const token = req.headers.authorization.spliy(" ")[1];
+      const tokenDecoded = jwt.verify(token, process.env.RESET)
+
+      req.user = await User.findOne(decoded.aud).select("-password");
+
+      
+
+    } catch (err) {
+        res.status(500).json({ message : "Internal Server Error"});
+    }
   }
 };
 

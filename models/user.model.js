@@ -31,9 +31,9 @@ const userSchema = new mongoose.Schema({
     language : {
         type : String 
     },
-    appliedInternships:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'internship',
+    appliedJobs:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'jobs',
         default:[]
     }],
     studentType : {
