@@ -34,7 +34,7 @@ const userCtrl = {
            await newUser.save();
 
            // generating and saving otp for email verfication in database 
-           let otp = (Math.floor(Math.random())*9000) + 1000;
+           let otp = (Math.floor(Math.random()*9000)) + 1000;
            let newOtp = new Otp({
             email : email ,
             otp : otp 
@@ -47,7 +47,7 @@ const userCtrl = {
            const accessToken = await token.signAccessToken(newUser.id);
            const refreshToken = await token.signRefreshToken(newUser.id);
 
-           // status 201 ---> Created + Sending user's data immediately to the frontend 
+           // status 201 ---> Created + Sending user's data immediately to the frontend + sending refresh/access Token
            res.status(201).json({
              success: true,
              message: "User Created Succesfully, Please Verify Your Email",
@@ -63,7 +63,27 @@ const userCtrl = {
             res.status(500).json({ error : "Internal Server Error"});
         }
     },
+    verifyEmail : async (req, res, next) =>  {
+      try {
+        const { email, otp } = req.body;
 
+        let OTP = await Otp.findOne({ email });
+        if (otp != OTP?.otp) {
+          res.status(400).json({ message : "OTP Mismatch"});
+        }
+        await User.findOneAndUpdate(
+          { email },
+          {
+            isVerified : true,
+          }
+        );
+        Otp.deleteOne({email});
+        res.json({ success: true, message: "Email is verified" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message : "Internal Server Error"});
+    }
+    },
     login : async (req, res) => {
         try{
           const { email, password } = req.body;
@@ -76,10 +96,16 @@ const userCtrl = {
           
           const passwordCheck = await bcryptjs.compare(password, user.password);
 
+          // Checking email verification 
+          if( !user.isVerified ){
+            res.status(401).json({ message : "Not Verified"});
+          }
+
           // generating accessToken and refreshToken
           const accessToken = await token.signAccessToken(user.id);
           const refreshToken = await token.signRefreshToken(user.id);
 
+          // sending afterLogin info 
           if (passwordCheck) {
             res.status(200).json({
               message: "Login Successful",
@@ -92,7 +118,7 @@ const userCtrl = {
             });
             return;
           }
-          res.status(401).json({ success: false, message: "Not Authorized" });
+          res.status(401).json({ success: false, message: "Invalid Credentials" });
         }catch(err){
             res.status(500).json({ message : "Internal Server Error"});
         }
@@ -117,7 +143,7 @@ const userCtrl = {
         }catch(error){
             res.status(500).json({ message : "Internal Server Error"});
         }
-    }
+    },
 };
 
 module.exports = {userCtrl};
