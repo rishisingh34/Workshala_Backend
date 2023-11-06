@@ -32,18 +32,18 @@ const authCtrl = {
         email: email,
         password: hashedPassword,
       });
-
+      
       // saving the newUser info
       await newUser.save();
-
+      
       // generating and saving otp for email verfication in database
       let otp = Math.floor(Math.random() * 9000) + 1000;
+
       let newOtp = new Otp({
         email: email,
         otp: otp,
       });
       await newOtp.save();
-
       sendmail(email, otp, "Email Verification Otp");
 
       // status 201 ---> Created + Sending user's data immediately to the frontend + sending refresh/access Token
@@ -56,6 +56,7 @@ const authCtrl = {
         }
       });
     } catch (err) {
+      console.log(err);
       res.status(500).json({ error: "Internal Server Error" });
     }
   },
@@ -222,8 +223,9 @@ const authCtrl = {
       
       if(decoded){
         res.status(400).json({ message : "Bad Request"});
-        return; 
-      }      
+        return;
+      }  
+    
 
       const hashedPassword = await bcryptjs.hash(newPassword, 8);
       await User.findOneAndUpdate(
@@ -234,26 +236,10 @@ const authCtrl = {
       res.status(201).json({ message: "Password Changed Succesfully" });
 
     }catch(err){
-      console.log(err);
+      console.log(error);
       res.status(500).json({ message : "Internal Server Error"});
     }
   }
 };
 
 module.exports = {authCtrl};
-
-
-
-
-
-
-
-
-
-
-
-
-//controller sendMail() 
-//sendMail
-//isVerified :true
-//res.redirect("http");
