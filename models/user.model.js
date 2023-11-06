@@ -19,17 +19,19 @@ const userSchema = new mongoose.Schema({
         default : false 
     },
     contact : {
-        type : Number 
+        type : Number ,
+        unique:true
     },
     currentCity : {
-        type : String 
+        type : String ,
     },
     gender : {
         type : String,
         enum:["Male","Female","Other"]
     },
     language : {
-        type : String 
+        type : Array,
+        default:[] 
     },
     appliedJobs:[{
         type: mongoose.Schema.Types.ObjectId,
@@ -42,9 +44,9 @@ const userSchema = new mongoose.Schema({
     preferences : {
         type : Array  
     },
-    position : {
-        type : String 
-    },
+    // position : {
+    //     type : String 
+    // },
     workLocation : {
         type : Array 
     }

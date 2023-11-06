@@ -46,10 +46,6 @@ const authCtrl = {
 
       sendmail(email, otp, "Email Verification Otp");
 
-      // generating accessToken and refreshToken
-      const accessToken = await token.signAccessToken(newUser.id);
-      const refreshToken = await token.signRefreshToken(newUser.id);
-
       // status 201 ---> Created + Sending user's data immediately to the frontend + sending refresh/access Token
       res.status(201).json({
         success: true,
@@ -57,9 +53,7 @@ const authCtrl = {
         data: {
           name: name,
           email: email,
-        },
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+        }
       });
     } catch (err) {
       res.status(500).json({ error: "Internal Server Error" });
@@ -107,7 +101,7 @@ const authCtrl = {
       const accessToken = await token.signAccessToken(user.id);
       const refreshToken = await token.signRefreshToken(user.id);
 
-      // sending afterLogin info
+      // sending basic info
       if (passwordCheck) {
         res.status(200).json({
           message: "Login Successful",
@@ -154,7 +148,7 @@ const authCtrl = {
         return;
       }
 
-      if (!user.verify) {
+      if (!user.isVerified) {
         res.status(401).json({ message: "Email not Verified" });
         return;
       }
@@ -165,16 +159,17 @@ const authCtrl = {
         await existingOtp.updateOne({ otp, createdAt: new Date() });
       } else {
         let newOtp = new Otp({
-          email,
-          otp,
+          email : email,
+          otp : otp,
         });
         await newOtp.save();
       }
+      console.log(otp)
       sendmail(email, otp, "Reset Passowrd");
 
       res.json({
         success: true,
-        message: "otp is send to your registered email",
+        message: "otp is sent to your registered email",
       });
     } catch (error) {
       console.log(error);
@@ -185,7 +180,8 @@ const authCtrl = {
   verifyOtp: async (req, res) => {
     try {
       const { email, otp } = req.body;
-      let OTP = Otp.findOne({ email: email });
+      let OTP = await Otp.findOne({ email: email });
+
       if (otp != OTP.otp) {
         res.status(400).json({ message: "Invalid OTP" });
         return;
@@ -212,9 +208,52 @@ const authCtrl = {
     }
   },
   changePassword : async (req, res) =>  {
-    const {newPassword} = req.body;
-     
+    try {
+      const { email, newPassword } = req.body;
+
+      if (!req.headers["authorization"]) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const authHeader = req.headers["authorization"];
+      const token = authHeader.split(" ")[1];
+
+      const decoded = await jwt.verify(token, process.env.RESET);
+      
+      if(decoded){
+        res.status(400).json({ message : "Bad Request"});
+        return; 
+      }      
+
+      const hashedPassword = await bcryptjs.hash(newPassword, 8);
+      await User.findOneAndUpdate(
+        { email: email },
+        { password: hashedPassword }
+      );
+
+      res.status(201).json({ message: "Password Changed Succesfully" });
+
+    }catch(err){
+      console.log(err);
+      res.status(500).json({ message : "Internal Server Error"});
+    }
   }
 };
 
 module.exports = {authCtrl};
+
+
+
+
+
+
+
+
+
+
+
+
+//controller sendMail() 
+//sendMail
+//isVerified :true
+//res.redirect("http");

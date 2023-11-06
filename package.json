@@ -4,7 +4,7 @@
   "description": "Backend Code for Job Portal ",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node app.js"
   },
   "author": "Rishi Raj Singh",
   "license": "ISC",

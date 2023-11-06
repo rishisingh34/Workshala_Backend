@@ -33,7 +33,7 @@ const token = {
       });
     });
   },
-  verifyAccessToken:  async (req, res, next) => {
+  verifyAccessToken: async (req, res, next) => {
     try {
       if (!req.headers["authorization"]) {
         res.status(401).json({ message: "Unauthorized" });
@@ -42,15 +42,15 @@ const token = {
       const authHeader = req.headers["authorization"];
       const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-   
+
       req.user = await User.findById(decoded.aud).select("-passwd");
-      console.log(req.user)
+      // console.log(req.user);
       next();
     } catch (err) {
-      res.status(500).json({ message : "Internal Server Error"});
+      res.status(500).json({ message: "Internal Server Error" });
     }
   },
-  verifyRefreshToken : async (req, res , next) => {
+  verifyRefreshToken: async (req, res, next) => {
     try {
       jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload) => {
         if (err) {
@@ -60,23 +60,10 @@ const token = {
         userId = payload.aud;
         return userId;
       });
-    }catch (err) {
-      res.status(500).json({ message : "Internal Server Error"});
+    } catch (err) {
+      res.status(500).json({ message: "Internal Server Error" });
     }
   },
-  verifyResetPasswordToken : async (req, res, next) => {
-    try {
-      const token = req.headers.authorization.spliy(" ")[1];
-      const tokenDecoded = jwt.verify(token, process.env.RESET)
-
-      req.user = await User.findOne(decoded.aud).select("-password");
-
-      
-
-    } catch (err) {
-        res.status(500).json({ message : "Internal Server Error"});
-    }
-  }
 };
 
 module.exports = {token};
