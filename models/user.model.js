@@ -39,8 +39,9 @@ const userSchema = new mongoose.Schema({
     preferences : {
         type : Array  
     },
-    position : {
-        type : String 
+    positionApplied : {
+        type : String ,
+        enum : ["Internship", "Full-Time"]
     },
     workLocation : {
         type : Array 

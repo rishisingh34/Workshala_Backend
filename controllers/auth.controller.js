@@ -219,9 +219,9 @@ const authCtrl = {
       const authHeader = req.headers["authorization"];
       const token = authHeader.split(" ")[1];
 
-      const decoded = await jwt.verify(token, process.env.RESET);
+      const decoded = jwt.verify(token, process.env.RESET);
       
-      if(decoded){
+      if(!decoded){
         res.status(400).json({ message : "Bad Request"});
         return;
       }  

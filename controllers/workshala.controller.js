@@ -9,6 +9,9 @@ const workshalaCtrl = {
         }catch(err){
             res.send(err); 
         }
+    },
+    getResume : {
+        
     }
 };
 

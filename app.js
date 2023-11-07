@@ -24,7 +24,7 @@ app.use(require("./routes/auth.route"));
 app.use(require("./routes/workshala.route"));
 
 app.get('/', (req, res) => {
-    res.send('Nothing');
+    res.send('<center><h1 style="color : green; font-family : lucida sans ">Server Entry Point</h1></center>');
 })
 
 app.listen( port , () => {

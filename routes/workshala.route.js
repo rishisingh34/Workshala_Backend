@@ -4,8 +4,9 @@ const {workshalaCtrl} = require("../controllers/workshala.controller");
 const {token} = require("../utils/token.util")
 
 router.get("/dashboard" , token.verifyAccessToken, workshalaCtrl.dashBoard);
-router.get("/resume");
-router.get("/jobs");
+// router.get("/resume", token.verifyAccessToken, workshalaCtrl.getResume);
+// router.post("/update/resume" , token.verifyAccessToken, workshalaCtrl.updateResume);
+// router.get("/jobs", token.verifyAccessToken, workshalaCtrl.getJobs);
 
 
 module.exports = router; 
