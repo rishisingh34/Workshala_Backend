@@ -9,33 +9,40 @@ const authCtrl = {
   signUp: async (req, res) => {
     try {
       // storing responses recieved from client side
-      const { email, password, firstName, lastName } = req.body;
-
-      // concatenating to get fullName
-      const name = firstName + " " + lastName;
-
-      // this block checks if email already exists
-      const checkEmail = await User.findOne({ email });
-      if (checkEmail) {
-        res
-          .status(409)
-          .json({ success: false, message: "User already Exists" });
-        return;
-      }
+      const { email, password, name, number } = req.body;
 
       // hashing Password using bcrypt
       const hashedPassword = await bcryptjs.hash(password, 8);
 
-      // storing user's info in database
+      // this block checks if email already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        if (!existingUser.isVerified) {
+
+          // updating the existing user's detail whose email is not verified 
+          existingUser.updateOne({
+            email: email,
+            name: name,
+            password: hashedPassword,
+            number: number,
+          });
+        }else{
+          res.status(409).json({ success: false, message: "User already Exists" });
+          return;
+        }
+      }
+
+      // storing new user's info in database
       const newUser = new User({
         name: name,
         email: email,
         password: hashedPassword,
+        number: number,
       });
-      
+
       // saving the newUser info
       await newUser.save();
-      
+
       // generating and saving otp for email verfication in database
       let otp = Math.floor(Math.random() * 9000) + 1000;
 
@@ -44,6 +51,8 @@ const authCtrl = {
         otp: otp,
       });
       await newOtp.save();
+
+      // sending email to req.body.email ---> 
       sendmail(email, otp, "Email Verification Otp");
 
       // status 201 ---> Created + Sending user's data immediately to the frontend + sending refresh/access Token
@@ -53,7 +62,7 @@ const authCtrl = {
         data: {
           name: name,
           email: email,
-        }
+        },
       });
     } catch (err) {
       console.log(err);
@@ -64,10 +73,13 @@ const authCtrl = {
     try {
       const { email, otp } = req.body;
 
+      // finding otp from the database 
       let OTP = await Otp.findOne({ email });
       if (otp != OTP?.otp) {
         res.status(400).json({ message: "OTP Mismatch" });
       }
+
+      // updating the user email verification status 
       await User.findOneAndUpdate(
         { email },
         {
@@ -75,6 +87,7 @@ const authCtrl = {
         }
       );
       Otp.deleteOne({ email });
+      
       res.json({ success: true, message: "Email is verified" });
     } catch (error) {
       console.log(error);
@@ -90,7 +103,7 @@ const authCtrl = {
         res.status(404).json({ message: "User not Found" });
         return;
       }
-
+      
       const passwordCheck = await bcryptjs.compare(password, user.password);
 
       // Checking email verification
@@ -124,7 +137,7 @@ const authCtrl = {
     try {
       const { refToken } = req.body;
       if (!refToken) {
-        res.status(400).json({ meassage: "Bad Request" });
+        res.status(400).json({ message: "Bad Request" });
         return;
       }
       const userId = await token.verifyRefreshToken(refToken);
@@ -137,6 +150,7 @@ const authCtrl = {
         refreshToken: refreshToken,
       });
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Internal Server Error" });
     }
   },

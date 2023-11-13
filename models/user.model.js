@@ -14,38 +14,31 @@ const userSchema = new mongoose.Schema({
         required : true , 
         unique : true  
     },
+    contact : {
+        type : Number ,
+        required : true
+    },
+    avatar  :{
+        type : String, // cloudinary url 
+    },
     isVerified :{
         type : Boolean,
         default : false 
     },
-    currentCity : {
-        type : String 
-    },
-    gender : {
-        type : String,
-        enum:["Male","Female","Other"]
-    },
-    language : {
-        type : String 
-    },
-    appliedJobs:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:'jobs',
-        default:[]
-    }],
-    studentType : {
-        type : String
-    },
-    preferences : {
-        type : Array  
-    },
-    positionApplied : {
-        type : String ,
-        enum : ["Internship", "Full-Time"]
-    },
-    workLocation : {
-        type : Array 
-    }
+    appliedJobs:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:'jobs',
+            default:[]
+        }
+    ],
+    coursesBought : [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : 'courses',
+            default : []
+        }
+    ],
 })
 
 module.exports = mongoose.model('users', userSchema) ;

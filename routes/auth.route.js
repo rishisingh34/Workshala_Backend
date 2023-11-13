@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { authCtrl } = require("../controllers/auth.controller");
-const {token } =require("../utils/token.util");
+// const {token } = require("../utils/token.util");
 
 router.post("/signUp", authCtrl.signUp);
 router.post("/verifyEmail", authCtrl.verifyEmail);

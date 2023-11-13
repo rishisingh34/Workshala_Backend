@@ -25,9 +25,11 @@ const jobSchema = new mongoose.Schema({
     applyBy : {
         type : String 
     },
-    applicants : {
-        type : String
-    }
+    applicants : [{
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'users', 
+        default : [],
+    }]
 },
 {
    timestamps : true  
