@@ -24,7 +24,7 @@ const authCtrl = {
             email: email,
             name: name,
             password: hashedPassword,
-            number: number,
+            contact: number,
           });
         }else{
           res.status(409).json({ success: false, message: "User already Exists" });
@@ -37,7 +37,7 @@ const authCtrl = {
         name: name,
         email: email,
         password: hashedPassword,
-        number: number,
+        contact: number,
       });
 
       // saving the newUser info
@@ -69,7 +69,15 @@ const authCtrl = {
       res.status(500).json({ error: "Internal Server Error" });
     }
   },
-  verifyEmail: async (req, res, next) => {
+  // renderVerifyEmailPage : async (req, res) => {
+  //   try { 
+  //     res.render('emailVerificationPage');
+  //   }catch (err){
+  //     console.log(err);
+  //     res.status(500).json({ error: "Internal Server Error" });
+  //   }
+  // },
+  verifyEmail: async (req, res) => {
     try {
       const { email, otp } = req.body;
 
@@ -103,7 +111,7 @@ const authCtrl = {
         res.status(404).json({ message: "User not Found" });
         return;
       }
-      
+
       const passwordCheck = await bcryptjs.compare(password, user.password);
 
       // Checking email verification

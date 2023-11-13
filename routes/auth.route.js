@@ -4,6 +4,7 @@ const { authCtrl } = require("../controllers/auth.controller");
 // const {token } = require("../utils/token.util");
 
 router.post("/signUp", authCtrl.signUp);
+// router.get("/verifyEmailPage", authCtrl.renderVerifyEmailPage);
 router.post("/verifyEmail", authCtrl.verifyEmail);
 router.post("/login", authCtrl.login);
 router.post("/refreshToken", authCtrl.refreshToken);

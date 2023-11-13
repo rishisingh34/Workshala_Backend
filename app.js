@@ -17,6 +17,9 @@ db.once( "open" , () => console.log("Database Connected"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true }));
 
+// using ejs for server-side rendering 
+app.set("view engine", "ejs");
+
 // route for authentication 
 app.use(require("./routes/auth.route"));
 

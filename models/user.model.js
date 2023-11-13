@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         type : Number ,
         required : true
     },
-    avatar  :{
+    image :{
         type : String, // cloudinary url 
     },
     isVerified :{
@@ -28,15 +28,13 @@ const userSchema = new mongoose.Schema({
     appliedJobs:[
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref:'jobs',
-            default:[]
+            ref:'jobs'
         }
     ],
     coursesBought : [
         {
             type : mongoose.Schema.Types.ObjectId,
-            ref : 'courses',
-            default : []
+            ref : 'courses'
         }
     ],
 })

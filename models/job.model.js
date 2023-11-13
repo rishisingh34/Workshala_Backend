@@ -1,14 +1,20 @@
 const mongoose = require('mongoose');
 
 const jobSchema = new mongoose.Schema({
-    companyName: {
-        type : String 
+    // companyId: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     required: true,
+    //     ref: "companies",
+    // },
+    companyName : {
+        type : String,
+        required : true
+    },
+    imageUrl : {
+        type : String
     },
     jobType : {
         type : String
-    },
-    jobPosts : {
-        type : Array
     },
     description : {
         type : String 
@@ -27,8 +33,7 @@ const jobSchema = new mongoose.Schema({
     },
     applicants : [{
         type : mongoose.Schema.Types.ObjectId,
-        ref : 'users', 
-        default : [],
+        ref : 'users'
     }]
 },
 {
@@ -36,3 +41,13 @@ const jobSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("jobs", jobSchema)
+
+// db.jobs.insertOne({
+//   companyName: "Google",
+//   jobType: "Internship",
+//   description: "Hiring Data Scientist",
+//   startDate: "1 Dec",
+//   stipend: "20,000",
+//   duration: "3 months",
+//   applyBy: "26 Nov",
+// });
