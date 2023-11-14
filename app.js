@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const port = process.env.PORT; 
 const dburl = process.env.dburl; 
@@ -12,6 +13,14 @@ mongoose.connect(dburl);
 const db = mongoose.connection;
 db.on( "error", (error) => console.log(error));
 db.once( "open" , () => console.log("Database Connected")); 
+
+
+app.use(
+  cors({
+    origin: "*" ,
+    credentials: true,
+  })
+);
 
 // Using bodyParser to handle request and responses from client-server 
 app.use(bodyParser.json());

@@ -6,6 +6,9 @@ const resumeSchema = new mongoose.Schema({
     required: true,
     ref: "users",
   },
+  about :{
+
+  },
   currentCity: {
     type: String,
   },
@@ -33,4 +36,4 @@ const resumeSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("resume", resumeSchema);
+module.exports = mongoose.model("profile", profileSchema);

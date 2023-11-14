@@ -9,13 +9,8 @@ const workshalaCtrl = {
             res.send(err); 
         }
     },
-    getResume : async (req, res) => {
-        try {
-            const resume = await User.findOne({ id : req.user.id}).select()
-        } catch(err) {
-            console.log(err);
-            res.status(500).json({ message : "Internal Server Error"});
-        }
+    getProfile : async (req, res) => {
+        
     },
     getJobs : async (req, res) => {
         try {
