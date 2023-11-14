@@ -26,6 +26,7 @@ const sendmail = async ( email , otp , subject ) => {
       <p style="font-size: 16px;>If you did not request this OTP, please ignore this email.Thank you for 
        choosing our service.
       </p>
+      <a href="https://workshala.onrender.com/verifyEmailPage">Click This link for Email Verification</a>
       <p style="font-size: 16px;>Best regards,</p>
       <p style="font-size: 16px;>Team WorkShala</p> `,
     };

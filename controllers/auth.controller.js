@@ -69,14 +69,14 @@ const authCtrl = {
       res.status(500).json({ error: "Internal Server Error" });
     }
   },
-  // renderVerifyEmailPage : async (req, res) => {
-  //   try { 
-  //     res.render('emailVerificationPage');
-  //   }catch (err){
-  //     console.log(err);
-  //     res.status(500).json({ error: "Internal Server Error" });
-  //   }
-  // },
+  renderVerifyEmailPage : async (req, res) => {
+    try { 
+      res.render('emailVerification');
+    }catch (err){
+      console.log(err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
   verifyEmail: async (req, res) => {
     try {
       const { email, otp } = req.body;
