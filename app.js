@@ -15,8 +15,11 @@ db.on( "error", (error) => console.log(error));
 db.once( "open" , () => console.log("Database Connected")); 
 
 
-app.use(cors());
-app.options("*", cors());
+app.use(cors({
+  origin : "https://localhost:5173",
+  methods : ["GET", "POST", "PUT", "DELETE"],
+  credentials : true 
+}))
 
 // Using bodyParser to handle request and responses from client-server 
 app.use(bodyParser.json());
