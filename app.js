@@ -15,12 +15,7 @@ db.on( "error", (error) => console.log(error));
 db.once( "open" , () => console.log("Database Connected")); 
 
 
-app.use(
-  cors({
-    origin: "*" ,
-    credentials: true,
-  })
-);
+app.use(cors());
 
 // Using bodyParser to handle request and responses from client-server 
 app.use(bodyParser.json());
