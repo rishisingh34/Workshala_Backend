@@ -85,7 +85,7 @@ const authCtrl = {
       const user = await User.find({ email: email});
       if(!user.isVerified){
         // finding otp from the database
-        let OTP = await Otp.findOne({ email });
+        let OTP = await Otp.findOne({ email : email});
         if (OTP) {
           if (otp != OTP?.otp) {
             res.status(401).json({ message: "OTP Mismatch" });
