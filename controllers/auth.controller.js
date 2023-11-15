@@ -32,16 +32,13 @@ const authCtrl = {
           // check if otp already exists for this email address
           const existingOtp = await Otp.findOne({ email: email });
           if (existingOtp) {
-            await existingOtp.updateOne({
-              otp: otp,
-            });
-          } else {
-            let newOtp = new Otp({
-              email: email,
-              otp: otp,
-            });
-            await newOtp.save();
-          }
+             await Otp.deleteOne({ email });
+          } 
+          let newOtp = new Otp({
+            email: email,
+            otp: otp,
+          });
+          await newOtp.save();
 
           // sending email to req.body.email --->
           sendmail(email, otp, "Email Verification Otp");
@@ -120,7 +117,7 @@ const authCtrl = {
               { $set: { isVerified: true} },
               { new : true }
             );
-            Otp.deleteOne({ email });
+            await Otp.deleteOne({ email });
             res.json({ success: true, message: "Email is verified" });
             return; 
           }
