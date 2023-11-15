@@ -73,7 +73,17 @@ const workshalaCtrl = {
     },
     jobByPreferences : async (req, res) => {
         try {
-            const jobs = await Job.find();
+            const userId = req.user.id;
+            const userProfile = await Profile.findOne({ userId : userId});
+            const preferences = userProfile.preferences;
+
+            const recommendationApiUrl = `https://internship-recommendation-modal2.onrender.com/recommendations/all`;
+            const response = await axios.get(recommendationApiUrl);
+            const recommendations = response.data.recommendations;
+            const objectIds = recommendations.map((item) => item[0]);
+
+            const jobs = await Job.find({ _id: { $in: objectIds }});
+            res.status(200).json(jobs);
             
 
         } catch(err) {

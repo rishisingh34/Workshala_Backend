@@ -7,7 +7,7 @@ router.get("/dashboard" , token.verifyAccessToken, workshalaCtrl.dashBoard);
 router.get("/profile", token.verifyAccessToken, workshalaCtrl.getProfile);
 router.post("/update/profile" , token.verifyAccessToken, workshalaCtrl.updateProfile);
 router.get("/jobs",  workshalaCtrl.getJobs);
-router.get("/jobsByPreferences", workshalaCtrl.jobByPreferences);
+router.get("/jobsByPreferences", token.verifyAccessToken,  workshalaCtrl.jobByPreferences);
 
 
 module.exports = router; 
