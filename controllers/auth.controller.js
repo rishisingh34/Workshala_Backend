@@ -132,6 +132,7 @@ const authCtrl = {
       // Checking email verification
       if (!user.isVerified) {
         res.status(401).json({ message: "Not Verified" });
+        return;
       }
 
       // generating accessToken and refreshToken
