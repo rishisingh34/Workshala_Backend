@@ -10,7 +10,7 @@ const authCtrl = {
     try {
       // storing responses recieved from client side
       const { email, password, name, number } = req.body;
-
+      
       // hashing Password using bcrypt
       const hashedPassword = await bcryptjs.hash(password, 8);
 
@@ -81,24 +81,39 @@ const authCtrl = {
     try {
       const { email, otp } = req.body;
 
-      // finding otp from the database 
-      let OTP = await Otp.findOne({ email });
-      if (otp != OTP?.otp) {
-        res.status(400).json({ message: "OTP Mismatch" });
-      }
-
-      // updating the user email verification status 
-      await User.findOneAndUpdate(
-        { email },
-        {
-          isVerified: true,
+      // check if email is verified
+      const user = await User.find({ email: email});
+      if(!user.isVerified){
+        // finding otp from the database
+        let OTP = await Otp.findOne({ email });
+        if (OTP) {
+          if (otp != OTP?.otp) {
+            res.status(401).json({ message: "OTP Mismatch" });
+            return; 
+          } else {
+            // updating the user email verification status
+            await User.findOneAndUpdate(
+              { email },
+              { $set: { isVerified: true} },
+              { new : true }
+            );
+            Otp.deleteOne({ email });
+            res.json({ success: true, message: "Email is verified" });
+            return; 
+          }
+        } else {
+          res.status(404).json({ message: "OTP Not Found" });
+          return; 
         }
-      );
-      Otp.deleteOne({ email });
+
+        
+      }else{
+        res.status(400).json({ message: "Email Already Verified" });
+        return;
+      }
       
-      res.json({ success: true, message: "Email is verified" });
     } catch (error) {
-      console.log(error);
+      console.log("Error in email Verification : " , error);
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
