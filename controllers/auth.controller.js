@@ -20,12 +20,14 @@ const authCtrl = {
         if (!existingUser.isVerified) {
 
           // updating the existing user's detail whose email is not verified 
-          existingUser.updateOne({
+          await existingUser.updateOne({
             email: email,
             name: name,
             password: hashedPassword,
             contact: number,
           });
+          res.status(201).json({success : true , message : "otp sent again successfully"});
+          return; // update
         }else{
           res.status(409).json({ success: false, message: "User already Exists" });
           return;
@@ -82,7 +84,8 @@ const authCtrl = {
       const { email, otp } = req.body;
 
       // check if email is verified
-      const user = await User.find({ email: email});
+      const user = await User.findOne({ email: email});
+      
       if(!user.isVerified){
         // finding otp from the database
         let OTP = await Otp.findOne({ email : email});
@@ -104,9 +107,7 @@ const authCtrl = {
         } else {
           res.status(404).json({ message: "OTP Not Found" });
           return; 
-        }
-
-        
+        }        
       }else{
         res.status(400).json({ message: "Email Already Verified" });
         return;
