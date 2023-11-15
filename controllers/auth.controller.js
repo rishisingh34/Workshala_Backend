@@ -10,7 +10,10 @@ const authCtrl = {
     try {
       // storing responses recieved from client side
       const { email, password, name, number } = req.body;
-      
+
+      // generating and saving otp for email verfication in database
+      let otp = Math.floor(Math.random() * 9000) + 1000;
+
       // hashing Password using bcrypt
       const hashedPassword = await bcryptjs.hash(password, 8);
 
@@ -18,21 +21,50 @@ const authCtrl = {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         if (!existingUser.isVerified) {
-
-          // updating the existing user's detail whose email is not verified 
+          // updating the existing user's detail whose email is not verified
           await existingUser.updateOne({
             email: email,
             name: name,
             password: hashedPassword,
             contact: number,
           });
-          res.status(201).json({success : true , message : "otp sent again successfully"});
+
+          // check if otp already exists for this email address
+          const existingOtp = await Otp.findOne({ email: email });
+          if (existingOtp) {
+            await existingOtp.updateOne({
+              otp: otp,
+            });
+          } else {
+            let newOtp = new Otp({
+              email: email,
+              otp: otp,
+            });
+            await newOtp.save();
+          }
+
+          // sending email to req.body.email --->
+          sendmail(email, otp, "Email Verification Otp");
+          res
+            .status(201)
+            .json({ success: true, message: "otp sent again successfully" });
           return; // update
-        }else{
-          res.status(409).json({ success: false, message: "User already Exists" });
+        } else {
+          res
+            .status(409)
+            .json({ success: false, message: "User already Exists" });
           return;
         }
       }
+
+      let newOtp = new Otp({
+        email: email,
+        otp: otp,
+      });
+      await newOtp.save();
+
+      // sending email to req.body.email --->
+      sendmail(email, otp, "Email Verification Otp");
 
       // storing new user's info in database
       const newUser = new User({
@@ -44,18 +76,6 @@ const authCtrl = {
 
       // saving the newUser info
       await newUser.save();
-
-      // generating and saving otp for email verfication in database
-      let otp = Math.floor(Math.random() * 9000) + 1000;
-
-      let newOtp = new Otp({
-        email: email,
-        otp: otp,
-      });
-      await newOtp.save();
-
-      // sending email to req.body.email ---> 
-      sendmail(email, otp, "Email Verification Otp");
 
       // status 201 ---> Created + Sending user's data immediately to the frontend + sending refresh/access Token
       res.status(201).json({
