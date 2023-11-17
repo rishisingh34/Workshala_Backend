@@ -34,7 +34,19 @@ const jobSchema = new mongoose.Schema({
     applicants : [{
         type : mongoose.Schema.Types.ObjectId,
         ref : 'users'
-    }]
+    }],
+    industry : {
+        type : String 
+    },
+    location : [{
+        type : String 
+    }],
+    companyType : {
+        type : String
+    },
+    detailedJobDescription : {
+        type : String 
+    }
 },
 {
    timestamps : true  

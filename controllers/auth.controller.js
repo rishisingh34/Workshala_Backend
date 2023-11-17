@@ -1,9 +1,11 @@
 const User = require("../models/user.model");
 const bcryptjs = require("bcryptjs");
-const {token} = require("../utils/token.util");
-const {sendmail} = require("../utils/mailer.util");
+const { token } = require("../utils/token.util");
+const { sendmail } = require("../utils/mailer.util");
 const Otp = require("../models/otp.model");
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const tokenExpiration = Date.now() + 24 * 60 * 60 * 1000;
 
 const authCtrl = {
   signUp: async (req, res) => {
@@ -11,73 +13,37 @@ const authCtrl = {
       // storing responses recieved from client side
       const { email, password, name, number } = req.body;
 
-      // generating and saving otp for email verfication in database
-      let otp = Math.floor(Math.random() * 9000) + 1000;
+      const user = await User.findOne({ email: email });
 
-      // hashing Password using bcrypt
-      const hashedPassword = await bcryptjs.hash(password, 8);
-
-      // this block checks if email already exists
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        if (!existingUser.isVerified) {
-          // updating the existing user's detail whose email is not verified
-          await existingUser.updateOne({
-            email: email,
-            name: name,
-            password: hashedPassword,
-            contact: number,
-          });
-
-          // check if otp already exists for this email address
-          const existingOtp = await Otp.findOne({ email: email });
-          if (existingOtp) {
-            await Otp.deleteOne({email : email});
-          } 
-          let newOtp = new Otp({
-            email: email,
-            otp: otp,
-          });
-          await newOtp.save();
-
-          // sending email to req.body.email --->
-          sendmail(email, otp, "Email Verification Otp");
-          res
-            .status(201)
-            .json({ success: true, message: "otp sent again successfully" });
-          return; // update
-        } else {
-          res
-            .status(409)
-            .json({ success: false, message: "User already Exists" });
-          return;
-        }
+      if (user) {
+        res.status(409).json({ message: "User already exists" });
+        return;
       }
 
-      let newOtp = new Otp({
-        email: email,
-        otp: otp,
-      });
-      await newOtp.save();
+      const hashedPassword = await bcryptjs.hash(password, 8); // hashing Password using bcrypt
+      const token = crypto.randomBytes(20).toString("hex"); // generating verification token for email verfication in database
 
-      // sending email to req.body.email --->
-      sendmail(email, otp, "Email Verification Otp");
-
-      // storing new user's info in database
       const newUser = new User({
         name: name,
-        email: email,
         password: hashedPassword,
+        email: email,
         contact: number,
+        isVerified: false,
+        verificationToken: {
+          token: token, // Token for Email Verification
+          expiration: tokenExpiration, // Token Expiration in 24hrs
+        },
       });
 
-      // saving the newUser info
       await newUser.save();
 
-      // status 201 ---> Created + Sending user's data immediately to the frontend + sending refresh/access Token
+      const verificationLink = `https://workshala.onrender.com/verifyEmailPage?token=${token}`;
+
+      sendmail(email, verificationLink, "Email Verificaition Link");
+
       res.status(201).json({
         success: true,
-        message: "User Created Succesfully, Please Verify Your Email",
+        message: "User Created Successfully, Please Verify Email",
         data: {
           name: name,
           email: email,
@@ -88,51 +54,24 @@ const authCtrl = {
       res.status(500).json({ error: "Internal Server Error" });
     }
   },
-  renderVerifyEmailPage : async (req, res) => {
-    try { 
-      res.render('emailVerification');
-    }catch (err){
+  renderVerifyEmailPage: async (req, res) => {
+    try {
+      const { token } = req.query;
+      const user = await User.findOne({ "verificationToken.token": token });
+
+      if (!user || user.verificationToken.expiration < Date.now()) {
+        return res.status(404).json({ error: "Invalid or expired token" });
+      }
+
+      await User.findOneAndUpdate(
+        { "verificationToken.token": token },
+        { $set: { isVerified: true } }
+      );
+
+      res.redirect("emailVerification"); // Rendering the Successful Verification Page
+    } catch (err) {
       console.log(err);
       res.status(500).json({ error: "Internal Server Error" });
-    }
-  },
-  verifyEmail: async (req, res) => {
-    try {
-      const { email, otp } = req.body;
-
-      // check if email is verified
-      const user = await User.findOne({ email: email});
-      
-      if(!user.isVerified){
-        // finding otp from the database
-        let OTP = await Otp.findOne({ email : email});
-        if (OTP) {
-          if (otp != OTP?.otp) {
-            res.status(401).json({ message: "OTP Mismatch" });
-            return; 
-          } else {
-            // updating the user email verification status
-            await User.findOneAndUpdate(
-              { email : email },
-              { $set: { isVerified: true} },
-              { new : true }
-            );
-            await Otp.deleteOne({ email : email });
-            res.json({ success: true, message: "Email is verified" });
-            return; 
-          }
-        } else {
-          res.status(404).json({ message: "OTP Not Found" });
-          return; 
-        }        
-      }else{
-        res.status(400).json({ message: "Email Already Verified" });
-        return;
-      }
-      
-    } catch (error) {
-      console.log("Error in email Verification : " , error);
-      res.status(500).json({ message: "Internal Server Error" });
     }
   },
   login: async (req, res) => {
@@ -216,12 +155,12 @@ const authCtrl = {
         await existingOtp.updateOne({ otp, createdAt: new Date() });
       } else {
         let newOtp = new Otp({
-          email : email,
-          otp : otp,
+          email: email,
+          otp: otp,
         });
         await newOtp.save();
       }
-      console.log(otp)
+      console.log(otp);
       sendmail(email, otp, "Reset Passowrd");
 
       res.json({
@@ -230,7 +169,7 @@ const authCtrl = {
       });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message : "Internal Server Error"});
+      res.status(500).json({ message: "Internal Server Error" });
       return;
     }
   },
@@ -246,25 +185,24 @@ const authCtrl = {
 
       Otp.deleteOne({ email });
 
-      let user = await User.findOne({ email })
-      const resetPasswordToken = jwt.sign( { id : user.id}, process.env.RESET, {
-        expiresIn : 600
+      let user = await User.findOne({ email });
+      const resetPasswordToken = jwt.sign({ id: user.id }, process.env.RESET, {
+        expiresIn: 600,
       });
 
       res.status(201).json({
-        success : true ,
-        message : "OTP validated",
-        data : {
-          resetPasswordToken
-        }
+        success: true,
+        message: "OTP validated",
+        data: {
+          resetPasswordToken,
+        },
       });
-
     } catch (err) {
       console.log(err);
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
-  changePassword : async (req, res) =>  {
+  changePassword: async (req, res) => {
     try {
       const { email, newPassword } = req.body;
 
@@ -276,12 +214,11 @@ const authCtrl = {
       const token = authHeader.split(" ")[1];
 
       const decoded = jwt.verify(token, process.env.RESET);
-      
-      if(!decoded){
-        res.status(400).json({ message : "Bad Request"});
+
+      if (!decoded) {
+        res.status(400).json({ message: "Bad Request" });
         return;
-      }  
-    
+      }
 
       const hashedPassword = await bcryptjs.hash(newPassword, 8);
       await User.findOneAndUpdate(
@@ -290,12 +227,11 @@ const authCtrl = {
       );
 
       res.status(201).json({ message: "Password Changed Succesfully" });
-
-    }catch(err){
+    } catch (err) {
       console.log(error);
-      res.status(500).json({ message : "Internal Server Error"});
+      res.status(500).json({ message: "Internal Server Error" });
     }
-  }
+  },
 };
 
-module.exports = {authCtrl};
+module.exports = { authCtrl };

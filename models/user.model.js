@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
         type : Boolean,
         default : false 
     },
+    verificationToken : {
+        token : String, 
+        expiration : Date,  
+    },
     appliedJobs:[
         {
             type: mongoose.Schema.Types.ObjectId,
