@@ -9,6 +9,7 @@ router.post("/update/profile" , token.verifyAccessToken, workshalaCtrl.updatePro
 router.get("/jobs",  workshalaCtrl.getJobs);
 router.get("/jobsByPreferences", token.verifyAccessToken,  workshalaCtrl.jobByPreferences);
 router.get("/getCompanies", workshalaCtrl.getCompanies);
+router.get("/getJobsByCompanyName", workshalaCtrl.getJobsByCompanyName);
 
 
 module.exports = router; 
