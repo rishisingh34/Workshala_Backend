@@ -208,7 +208,7 @@ const authCtrl = {
 
       Otp.deleteOne({ email });
 
-      let user = await User.findOne({ email });
+      let user = await User.findOne({ email : email });
       
       user.updateOne({ password : newPassword });
 

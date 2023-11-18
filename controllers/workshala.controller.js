@@ -105,7 +105,7 @@ const workshalaCtrl = {
     },
     getJobsByCompanyName : async (req, res) => {
         try {
-            const companyName = req.params.companyName;
+            const {companyName} = req.body;
             const jobs = await Job.find({ companyName: companyName });
             res.status(200).json(jobs);
         } catch(err) {
