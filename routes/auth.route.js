@@ -10,6 +10,6 @@ router.post("/login", authCtrl.login);
 router.post("/refreshToken", authCtrl.refreshToken);
 router.post("/forgotPassword",  authCtrl.forgotPassword);
 router.post("/verifyOtp", authCtrl.verifyOtp);
-router.post("/changePassword",  authCtrl.changePassword);
+// router.post("/changePassword",  authCtrl.changePassword);
 
 module.exports = router;

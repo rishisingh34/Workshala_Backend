@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const bcryptjs = require("bcryptjs");
 const { token } = require("../utils/token.util");
-const { sendmail } = require("../utils/mailer.util");
+const { sendmail , sendOtpMail} = require("../utils/mailer.util");
 const Otp = require("../models/otp.model");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -184,7 +184,7 @@ const authCtrl = {
         await newOtp.save();
       }
       console.log(otp);
-      sendmail(email, otp, "Reset Passowrd");
+      sendOtpMail(email, otp, "Reset Passowrd");
 
       res.json({
         success: true,
@@ -198,7 +198,7 @@ const authCtrl = {
   },
   verifyOtp: async (req, res) => {
     try {
-      const { email, otp } = req.body;
+      const { email, otp , newPassword} = req.body;
       let OTP = await Otp.findOne({ email: email });
 
       if (otp != OTP.otp) {
@@ -209,52 +209,18 @@ const authCtrl = {
       Otp.deleteOne({ email });
 
       let user = await User.findOne({ email });
-      const resetPasswordToken = jwt.sign({ id: user.id }, process.env.RESET, {
-        expiresIn: 600,
-      });
+      
+      user.updateOne({ password : newPassword });
 
       res.status(201).json({
         success: true,
-        message: "OTP validated",
-        data: {
-          resetPasswordToken,
-        },
+        message: "OTP validated. Password Changed",
       });
     } catch (err) {
       console.log(err);
       res.status(500).json({ message: "Internal Server Error" });
     }
-  },
-  changePassword: async (req, res) => {
-    try {
-      const { email, newPassword } = req.body;
-
-      if (!req.headers["authorization"]) {
-        res.status(401).json({ message: "Unauthorized" });
-        return;
-      }
-      const authHeader = req.headers["authorization"];
-      const token = authHeader.split(" ")[1];
-
-      const decoded = jwt.verify(token, process.env.RESET);
-
-      if (!decoded) {
-        res.status(400).json({ message: "Bad Request" });
-        return;
-      }
-
-      const hashedPassword = await bcryptjs.hash(newPassword, 8);
-      await User.findOneAndUpdate(
-        { email: email },
-        { password: hashedPassword }
-      );
-
-      res.status(201).json({ message: "Password Changed Succesfully" });
-    } catch (err) {
-      console.log(error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  },
+  }
 };
 
 module.exports = { authCtrl };
