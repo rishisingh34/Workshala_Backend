@@ -3,6 +3,7 @@ const Job = require("../models/job.model");
 const Profile = require("../models/profile.model");
 const axios = require('axios');
 const Company = require('../models/company.model');
+const multer = require('multer')
 
 const workshalaCtrl = {
     dashBoard : async (req, res) => {
@@ -79,7 +80,7 @@ const workshalaCtrl = {
             const userProfile = await Profile.findOne({ userId : userId});
             const preferences = userProfile.preferences;
 
-            const recommendationApiUrl = `https://internship-recommendation-modal2.onrender.com/recommendations/all`;
+            const recommendationApiUrl = `https://internship-recommendation-modal2.onrender.com/recommendations/${preferences}`;
             const response = await axios.get(recommendationApiUrl);
             const recommendations = response.data.recommendations;
             const objectIds = recommendations.map((item) => item[0]);
