@@ -5,18 +5,10 @@ const companySchema = new mongoose.Schema({
         type : String,
         required : true,
     },
-    buisnessEmail : {
+    location : {
         type : String,
-        required : true
     },
-    password : {
-        type : String,
-        required : true
-    },
-    contact : {
-        type : Number,
-        required : true
-    }
+    
 })
 
 module.exports = mongoose.model('companies', companySchema);

@@ -15,13 +15,33 @@ const authCtrl = {
 
       const user = await User.findOne({ email: email });
 
-      if (user) {
-        res.status(409).json({ message: "User already exists" });
-        return;
-      }
-
       const hashedPassword = await bcryptjs.hash(password, 8); // hashing Password using bcrypt
       const token = crypto.randomBytes(20).toString("hex"); // generating verification token for email verfication in database
+
+      if(user){
+        if (user.isVerified) {
+          res.status(409).json({ message: "User already exists" });
+          return;
+        } else {
+          user.updateOne({
+            email: email,
+            password: password,
+            name: name,
+            contact: number,
+            isVerified: false,
+            verificationToken: {
+              token: token,
+              expiration: tokenExpiration,
+            },
+          });
+          res
+            .status(200)
+            .json({
+              message: "User Data Updated Successfully. Email Sent Again",
+            });
+          return;
+        }
+      }
 
       const newUser = new User({
         name: name,

@@ -27,6 +27,9 @@ app.use(
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true }));
 
+// for using static assets from public folder 
+app.use(express.static('public'));
+
 // using ejs for server-side rendering 
 app.set("view engine", "ejs");
 
