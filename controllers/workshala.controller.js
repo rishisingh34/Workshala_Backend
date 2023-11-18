@@ -51,6 +51,7 @@ const workshalaCtrl = {
                 preferences: req.body.preferences || [],
                 positionApplied: req.body.positionApplied,
                 workLocation: req.body.workLocation || [],
+                imageUrl : req.body.imageUrl
               }
             );
 

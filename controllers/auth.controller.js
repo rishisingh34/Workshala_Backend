@@ -68,7 +68,7 @@ const authCtrl = {
         { $set: { isVerified: true } }
       );
 
-      res.redirect("emailVerification"); // Rendering the Successful Verification Page
+      res.render("emailVerification"); // Rendering the Successful Verification Page
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: "Internal Server Error" });
