@@ -2,6 +2,7 @@ const Job = require("../models/job.model");
 // const User = require("../models/user.model");
 const Profile = require("../models/profile.model");
 const axios = require('axios');
+const Company = require('../models/company.model');
 
 const workshalaCtrl = {
     dashBoard : async (req, res) => {
@@ -87,6 +88,15 @@ const workshalaCtrl = {
             res.status(200).json(jobs);
             
 
+        } catch(err) {
+            console.log(err);
+            res.status(500).json({ message : "Internal Server Error"});
+        }
+    },
+    getCompanies : async (req, res) => {
+        try {
+            const companies = await Company.find();
+            res.status(200).json(companies);
         } catch(err) {
             console.log(err);
             res.status(500).json({ message : "Internal Server Error"});

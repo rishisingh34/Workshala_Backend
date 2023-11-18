@@ -18,6 +18,8 @@ const authCtrl = {
       const hashedPassword = await bcryptjs.hash(password, 8); // hashing Password using bcrypt
       const token = crypto.randomBytes(20).toString("hex"); // generating verification token for email verfication in database
 
+      const verificationLink = `https://workshala.onrender.com/verifyEmailPage?token=${token}`;
+
       if(user){
         if (user.isVerified) {
           res.status(409).json({ message: "User already exists" });
@@ -34,6 +36,9 @@ const authCtrl = {
               expiration: tokenExpiration,
             },
           });
+
+          sendmail(email, verificationLink, "Email Verificaition Link"); // verification link sent to existing user again ( email !verified)
+
           res
             .status(200)
             .json({
@@ -56,8 +61,6 @@ const authCtrl = {
       });
 
       await newUser.save();
-
-      const verificationLink = `https://workshala.onrender.com/verifyEmailPage?token=${token}`;
 
       sendmail(email, verificationLink, "Email Verificaition Link");
 
