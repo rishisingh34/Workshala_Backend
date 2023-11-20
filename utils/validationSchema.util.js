@@ -3,8 +3,9 @@ const Joi = require("joi");
 const authSchema = Joi.object({
   email: Joi.string().email({
     minDomainSegments: 2,
-    tlds: { allow: ["com", "net"] },
-  }),
+    tlds: { allow: ["com", "net", "in", "gov", "org", "edu"] },
+  })
+  .message("Please enter a valid email address"),
   password: Joi.string()
     .pattern(
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*[a-zA-Z]).{8,}$/
@@ -25,3 +26,33 @@ const authSchema = Joi.object({
 
 
 module.exports = authSchema;
+
+// error Structure 
+// {
+//   "details": [
+//     {
+//       "message": "\"email\" must be a valid email",
+//       "path": ["email"],
+//       "type": "string.email",
+//       "context": {
+//         // Context specific to the error
+//       }
+//     },
+//     {
+//       "message": "Invalid password format",
+//       "path": ["password"],
+//       "type": "string.pattern.base",
+//       "context": {
+//         // Context specific to the error
+//       }
+//     },
+//     {
+//       "message": "Invalid name format",
+//       "path": ["name"],
+//       "type": "string.pattern.base",
+//       "context": {
+//         // Context specific to the error
+//       }
+//     }
+//   ]
+// }

@@ -1,12 +1,13 @@
 const User = require("../models/user.model");
 const bcryptjs = require("bcryptjs");
-const { token } = require("../utils/token.util");
+const { Token } = require("../middlewares/token.middleware");
 const { sendmail , sendOtpMail} = require("../utils/mailer.util");
 const Otp = require("../models/otp.model");
 // const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const tokenExpiration = Date.now() + 24 * 60 * 60 * 1000;
-const authSchema = require('../utils/validationSchema.util')
+const authSchema = require('../utils/validationSchema.util');
+const Joi = require('joi');
 
 const authCtrl = {
   signUp: async (req, res) => {
@@ -14,20 +15,18 @@ const authCtrl = {
       // storing responses recieved from client side
       // const { email, password, name, number } = req.body;
 
-      const validationErrors = {};
+      const validationErrors = [];
 
       try {
-        await authSchema.validateAsync(req.body);
+        await authSchema.validateAsync(req.body, { abortEarly: false });
       } catch (validationErr) {
         validationErr.details.forEach((error) => {
-          if (!validationErrors[error.path[0]]) {
-            validationErrors[error.path[0]] = [];
-          }
-          validationErrors[error.path[0]].push(error.message);
+          validationErrors.push(error.message);
         });
       }
 
-      if (Object.keys(validationErrors).length > 0) {
+      // Sending a combined error message for all validation errors
+      if (validationErrors.length > 0) {
         return res.status(400).json({ errors: validationErrors });
       }
 
@@ -125,9 +124,9 @@ const authCtrl = {
 
       await User.findOneAndUpdate(
         { "verificationToken.token": token },
-        { 
+        {
           $set: { isVerified: true },
-          $unset : { verificationToken : 1 }
+          $unset: { verificationToken: 1 },
         }
       );
 
@@ -156,8 +155,8 @@ const authCtrl = {
       }
 
       // generating accessToken and refreshToken
-      const accessToken = await token.signAccessToken(user.id);
-      const refreshToken = await token.signRefreshToken(user.id);
+      const accessToken = await Token.signAccessToken(user.id);
+      const refreshToken = await Token.signRefreshToken(user.id);
 
       // sending basic info
       if (passwordCheck) {
@@ -174,27 +173,6 @@ const authCtrl = {
       }
       res.status(401).json({ success: false, message: "Invalid Credentials" });
     } catch (err) {
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  },
-  refreshToken: async (req, res) => {
-    try {
-      const { refToken } = req.body;
-      if (!refToken) {
-        res.status(400).json({ message: "Bad Request" });
-        return;
-      }
-      const userId = await token.verifyRefreshToken(refToken);
-
-      const accessToken = await token.signAccessToken(userId);
-      const refreshToken = await token.signRefreshToken(userId);
-
-      res.status(201).json({
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-      });
-    } catch (error) {
-      console.log(error);
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
@@ -238,7 +216,13 @@ const authCtrl = {
   },
   verifyOtp: async (req, res) => {
     try {
-      const { email, otp , newPassword} = req.body;
+      const { email, otp, newPassword } = req.body;
+
+      if (!(await User.findOne({ email: email }))) {
+        res.status(404).json({ message: "User Not Found" });
+        return;
+      }
+
       let OTP = await Otp.findOne({ email: email });
 
       if (otp != OTP.otp) {
@@ -246,11 +230,29 @@ const authCtrl = {
         return;
       }
 
-      Otp.deleteOne({ email });
+      Otp.deleteOne({ email: email });
 
-      let user = await User.findOne({ email : email });
-      
-      user.updateOne({ password : newPassword });
+      const passwordSchema = Joi.string()
+        .pattern(
+          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*[a-zA-Z]).{8,}$/
+        )
+        .message(
+          "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit, 1 special character, and be at least 8 characters long"
+        )
+        .required();
+
+      const { error: passwordError } = passwordSchema.validate(newPassword);
+      if (passwordError) {
+        res.status(400).json({ message: passwordError.details[0].message });
+        return;
+      }
+
+      const hashedPassword = await bcryptjs.hash(newPassword, 8);
+
+      await User.findOneAndUpdate(
+        { email: email },
+        { $set: { password: hashedPassword } }
+      );
 
       res.status(201).json({
         success: true,
@@ -258,6 +260,28 @@ const authCtrl = {
       });
     } catch (err) {
       console.log(err);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+  refreshToken: async (req, res) => {
+    try {
+      const { refToken } = req.body;
+      if (!refToken) {
+        res.status(400).json({ message: "Bad Request" });
+        return;
+      }
+      
+      const userId = await Token.verifyRefreshToken(refToken);
+      console.log(refToken);
+      const accessToken = await Token.signAccessToken(userId);
+      const refreshToken = await Token.signRefreshToken(userId);
+
+      res.status(201).json({
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      });
+    } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Internal Server Error" });
     }
   }

@@ -1,23 +1,23 @@
 const mongoose = require('mongoose');
 
 const profileSchema = new mongoose.Schema({
-  userId : {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "users",
   },
-  name : {
-    type : String,
-    required : true
+  name: {
+    type: String,
+    required: true,
   },
-  imageUrl : {
-    type : String ,
+  imageUrl: {
+    type: String,
   },
-  about :{
-    type : String
+  about: {
+    type: String,
   },
-  skills : {
-    type : Array,
+  skills: {
+    type: Array,
     default: [],
   },
   currentCity: {
@@ -45,6 +45,18 @@ const profileSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+  appliedJobs: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "jobs",
+    },
+  ],
+  coursesBought: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "courses",
+    },
+  ],
 });
 
 module.exports = mongoose.model("profile", profileSchema);

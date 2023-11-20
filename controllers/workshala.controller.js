@@ -3,7 +3,7 @@ const Job = require("../models/job.model");
 const Profile = require("../models/profile.model");
 const axios = require('axios');
 const Company = require('../models/company.model');
-const multer = require('multer')
+const uploadOnCloudinary = require('../utils/cloudinary.util');
 
 const workshalaCtrl = {
     dashBoard : async (req, res) => {
@@ -39,8 +39,21 @@ const workshalaCtrl = {
     },
     updateProfile : async (req, res) => {
         try {
+            
+            const localFilePath = req.file.path; // Get the path of the uploaded file
 
-            await Profile.findOneAndUpdate(
+            // Upload the file to Cloudinary
+            const cloudinaryResponse = await uploadOnCloudinary(localFilePath);
+
+            // Check if file was successfully uploaded to Cloudinary
+            if (!cloudinaryResponse || !cloudinaryResponse.url) {
+              return res
+                .status(500)
+                .json({ message: "Failed to upload image to Cloudinary" });
+            }
+
+
+            const profile = await Profile.findOneAndUpdate(
               { userId: req.user.id },
               {
                 name: req.body.name,
@@ -53,11 +66,11 @@ const workshalaCtrl = {
                 preferences: req.body.preferences || [],
                 positionApplied: req.body.positionApplied,
                 workLocation: req.body.workLocation || [],
-                imageUrl : req.body.imageUrl
+                imageUrl: cloudinaryResponse.url,
               }
             );
 
-            res.status(200).json({ message : "Successfully updated profile" });
+            res.status(200).json({ message : "Successfully updated profile" , profile : profile});
 
         }catch(err){
             console.log(err);
@@ -112,7 +125,7 @@ const workshalaCtrl = {
             console.log(err);
             res.status(500).json({ message : "Internal Server Error"});
         }
-    },
+    }
 };
 
 module.exports = {workshalaCtrl};

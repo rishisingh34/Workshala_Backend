@@ -6,8 +6,7 @@ const userSchema = new mongoose.Schema({
         required : true 
     },
     password : {
-        type : String ,
-        required : true 
+        type : String 
     }, 
     email :  {
         type : String ,
@@ -15,10 +14,9 @@ const userSchema = new mongoose.Schema({
         unique : true  
     },
     contact : {
-        type : Number ,
-        required : true
+        type : Number 
     },
-    image :{
+    imageUrl :{
         type : String, // cloudinary url 
     },
     isVerified :{
@@ -29,18 +27,13 @@ const userSchema = new mongoose.Schema({
         token : String, 
         expiration : Date,  
     },
-    appliedJobs:[
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref:'jobs'
-        }
-    ],
-    coursesBought : [
-        {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : 'courses'
-        }
-    ],
+    googleId : {
+        type : String,
+        unique : true
+    },
+    googleAccessToken : {
+        type : String
+    }
 })
 
 module.exports = mongoose.model('users', userSchema) ;

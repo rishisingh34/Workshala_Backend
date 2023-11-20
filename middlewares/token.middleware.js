@@ -2,7 +2,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
-const token = {
+const Token = {
   signAccessToken: (id) => {
     return new Promise((resolve, reject) => {
       const payload = {};
@@ -50,23 +50,28 @@ const token = {
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
-  verifyRefreshToken: async (req, res, next) => {
+  verifyRefreshToken: async (refToken) => {
     try {
-      jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload) => {
-        if (err) {
-          res.status(401).json({ message: "Invalid Token" });
-          return;
-        }
-        userId = payload.aud;
-        return userId;
-      });
+
+      // extracting the payload from the refresh token after verification
+      const payload = jwt.verify(refToken, process.env.REFRESH_TOKEN_SECRET);
+      
+      // Checking if payload contains userId 
+      if (!payload.aud) {
+        throw new Error("Invalid refresh token");
+      }
+      
+      // Return the userId
+      return payload.aud;
+
     } catch (err) {
-      res.status(500).json({ message: "Internal Server Error" });
+      // Pass the error to the global error handler or handle it appropriately
+      throw new Error("Token Verification Failed");
     }
   },
 };
 
-module.exports = {token};
+module.exports = {Token};
 
 // check the access token recieved on website ---> jwt.io
 // access token ---> 
