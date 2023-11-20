@@ -9,7 +9,6 @@ router.get("/profile", Token.verifyAccessToken, workshalaCtrl.getProfile);
 router.post(
   "/update/profile",
   Token.verifyAccessToken,
-  upload.single("profileImg"),
   workshalaCtrl.updateProfile
 );
 router.get("/jobs", workshalaCtrl.getJobs);
