@@ -39,9 +39,9 @@ const workshalaCtrl = {
     },
     updateProfile : async (req, res) => {
         try {
-            
+            console.log(req.file);
             const localFilePath = req.file.path; // Get the path of the uploaded file
-
+            console.log(localFilePath);
             // Upload the file to Cloudinary
             const cloudinaryResponse = await uploadOnCloudinary(localFilePath);
 

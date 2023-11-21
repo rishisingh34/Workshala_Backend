@@ -3,7 +3,6 @@ const bcryptjs = require("bcryptjs");
 const { Token } = require("../middlewares/token.middleware");
 const { sendmail , sendOtpMail} = require("../utils/mailer.util");
 const Otp = require("../models/otp.model");
-// const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const tokenExpiration = Date.now() + 24 * 60 * 60 * 1000;
 const authSchema = require('../utils/validationSchema.util');
@@ -12,14 +11,17 @@ const Joi = require('joi');
 const authCtrl = {
   signUp: async (req, res) => {
     try {
-      // storing responses recieved from client side
-      // const { email, password, name, number } = req.body;
 
+      // array for Errors in validating Signup fields
       const validationErrors = [];
 
       try {
-        await authSchema.validateAsync(req.body, { abortEarly: false });
+        // validate email_password_name_Number
+        await authSchema.validateAsync(req.body, { abortEarly: false }); // "abortearly : false" to ensure that it does not abort process after validation fails for one field 
       } catch (validationErr) {
+        // catches validation errors in validationErr
+        console.log(validationErr);
+        // pushing validationErr
         validationErr.details.forEach((error) => {
           validationErrors.push(error.message);
         });

@@ -14,18 +14,19 @@ const db = mongoose.connection;
 db.on( "error", (error) => console.log(error));
 db.once( "open" , () => console.log("Database Connected")); 
 
-
+// resolving cors errors 
 app.use(
   cors({
-    origin: "*",
-    credentials: true,
-    optionsSuccessStatus: 200,
+    origin: "*", // allow all requests
+    credentials: true,  
+    optionsSuccessStatus: 200, // send status code 200 upon success 
   })
 );
 
 // Using bodyParser to handle request and responses from client-server 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended : true }));
+// to handle data in url generally in query parameters ( ?Key=value pairs )
+app.use(bodyParser.urlencoded({ extended : true }));   // extended : true for handling complex parameters
 
 // for using static assets from public folder 
 app.use(express.static('public'));
