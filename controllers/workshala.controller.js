@@ -39,14 +39,16 @@ const workshalaCtrl = {
     },
     updateProfile : async (req, res) => {
         try {
-            console.log(req.file);
+            // console.log(req.file);
+
             const localFilePath = req.file.path; // Get the path of the uploaded file
-            console.log(localFilePath);
+            // console.log(localFilePath);
+
             // Upload the file to Cloudinary
             const cloudinaryResponse = await uploadOnCloudinary(localFilePath);
 
             // Check if file was successfully uploaded to Cloudinary
-            if (!cloudinaryResponse || !cloudinaryResponse.url) {
+            if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
               return res
                 .status(500)
                 .json({ message: "Failed to upload image to Cloudinary" });
@@ -66,7 +68,7 @@ const workshalaCtrl = {
                 preferences: req.body.preferences || [],
                 positionApplied: req.body.positionApplied,
                 workLocation: req.body.workLocation || [],
-                imageUrl: cloudinaryResponse.url,
+                imageUrl: cloudinaryResponse.secure_url,
               }
             );
 
