@@ -169,7 +169,11 @@ const authCtrl = {
             email: user.email,
           },
           accessToken: accessToken,
-          refreshToken: refreshToken,
+        });
+
+        // sending refresh token as a cookie ; 
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
         });
         return;
       }

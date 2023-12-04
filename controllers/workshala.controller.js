@@ -46,12 +46,14 @@ const workshalaCtrl = {
 
             // Upload the file to Cloudinary
             const cloudinaryResponse = await uploadOnCloudinary(localFilePath);
+            console.log(cloudinaryResponse);
 
             // Check if file was successfully uploaded to Cloudinary
             if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
               return res
                 .status(500)
                 .json({ message: "Failed to upload image to Cloudinary" });
+
             }
 
 
@@ -75,7 +77,7 @@ const workshalaCtrl = {
             res.status(200).json({ message : "Successfully updated profile" , profile : profile});
 
         }catch(err){
-            console.log(err);
+            console.log(err);            
             res.status(500).json({ message : "Internal Server Error"});
         }
     },
@@ -122,6 +124,9 @@ const workshalaCtrl = {
         try {
             const {companyName} = req.body;
             const jobs = await Job.find({ companyName: companyName });
+            const company = await Job.findOne({ companyName: companyName });
+            
+            
             res.status(200).json(jobs);
         } catch(err) {
             console.log(err);

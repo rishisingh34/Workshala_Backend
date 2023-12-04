@@ -1,0 +1,3 @@
+20230822011100000900852781358050605 - transaction number 
+360044874902  - bank reference 
+0133498025 - token number 

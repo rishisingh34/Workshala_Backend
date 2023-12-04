@@ -18,7 +18,7 @@ const uploadOnCloudinary = async (localFilePath) => {
 
     // upload the file on cloudinary
     const response = cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto",
+      resource_type : "raw",
     });
 
     // console.log("file is uploaded to cloudinary",(await response).secure_url);
@@ -30,5 +30,7 @@ const uploadOnCloudinary = async (localFilePath) => {
     console.log(err);
   }
 };
+
+
 
 module.exports = uploadOnCloudinary;

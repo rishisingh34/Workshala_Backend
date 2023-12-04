@@ -14,10 +14,7 @@ const authSchema = Joi.object({
       "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit, 1 special character, and be at least 8 characters long"
     )
     .required(),
-  name: Joi.string()
-    .regex(/^[a-zA-Z]{3,}$/)  
-    .message("Name must be alphabetic and at least 3 characters long")
-    .required(),
+  name: Joi.string().required(),
   number: Joi.string()
     .pattern(/^[6-9]\d{9}$/)
     .message("Please enter a valid 10-digit Indian mobile number")
