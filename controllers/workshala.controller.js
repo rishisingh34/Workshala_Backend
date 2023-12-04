@@ -4,6 +4,7 @@ const Profile = require("../models/profile.model");
 const axios = require('axios');
 const Company = require('../models/company.model');
 const uploadOnCloudinary = require('../utils/cloudinary.util');
+const Cart = require('../models/cart.model');
 
 const workshalaCtrl = {
     dashBoard : async (req, res) => {
@@ -131,6 +132,69 @@ const workshalaCtrl = {
         } catch(err) {
             console.log(err);
             res.status(500).json({ message : "Internal Server Error"});
+        }
+    },
+
+    addToCart : async (req, res) => {
+        try {
+            const {jobId} = req.body ;
+
+            const userId = req.user.id ;
+            const existingCart = await Cart.findOne({ userId : userId });
+
+            if(!existingCart){
+                const newCart = new Cart({
+                    userId : userId ,
+                    jobsApplied : [jobId]
+                });               
+
+                await newCart.save();
+            } else {
+                if (!Array.isArray(existingCart.jobsApplied)) {
+                  existingCart.jobsApplied = []; 
+                }
+
+                if (!existingCart.jobsApplied.includes(jobId)) {
+                  existingCart.jobsApplied.push(jobId);
+                  await existingCart.save();
+                } else {
+                  res
+                    .status(400)
+                    .json({ message: "Job is already in the Cart" });
+                  return;
+                }
+            }
+            
+            const job = await Job.findById(jobId);
+            
+            job.applicants.push(userId);
+            await job.save();
+
+            return res.status(201).json({message : "Job Added to Cart Successfully"});           
+
+
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message : "Internal Server Error"});
+        }
+    },
+    getCartItems : async (req, res) => {
+        try {
+            const userId = req.user.id ;
+            const cart = await Cart.findOne({ userId : userId}).populate('jobsApplied');
+
+            if( !cart || !cart.jobsApplied.length ) {
+                res.status(404).json({ message: "No Items found in Cart" });
+                return ; 
+            } else{
+                const jobs = cart.jobsApplied;
+                res.status(200).json({ jobs });
+                return ;
+            }
+
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message : "Internal Server Error "});
         }
     }
 };

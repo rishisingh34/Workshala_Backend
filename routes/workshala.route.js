@@ -21,4 +21,7 @@ router.get(
 router.get("/getCompanies", workshalaCtrl.getCompanies);
 router.get("/getJobsByCompanyName", workshalaCtrl.getJobsByCompanyName);
 
+router.post("/addToCart" , Token.verifyAccessToken ,workshalaCtrl.addToCart);
+router.get("/getCartItems", Token.verifyAccessToken, workshalaCtrl.getCartItems);
+
 module.exports = router;
