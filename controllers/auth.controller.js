@@ -41,8 +41,7 @@ const authCtrl = {
 
       if (user) {
         if (user.isVerified) {
-          res.status(409).json({ message: "User already exists" });
-          return;
+         return res.status(409).json({ message: "User already exists" });
         } else {
           if (
             !user.verificationToken.expiration ||
@@ -65,11 +64,10 @@ const authCtrl = {
               }
             );
 
-            res.status(200).json({
-              message:
-                "User updated successfully. Verification Link Sent Again",
-            });
-            return;
+           return res.status(200).json({
+             message: "User updated successfully. Verification Link Sent Again",
+           });
+            
           } else {
             res.status(200).json({
               message:
@@ -177,9 +175,9 @@ const authCtrl = {
         });
         return;
       }
-      res.status(401).json({ success: false, message: "Invalid Credentials" });
+      return res.status(401).json({ success: false, message: "Invalid Credentials" });
     } catch (err) {
-      res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   },
   forgotPassword: async (req, res) => {
