@@ -149,12 +149,13 @@ const authCtrl = {
 
         // res.status(200).json({ message : "Login Successful"});
 
-        res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-        });
-
-        res.setHeader("Authorization", `Bearer ${accessToken}`);
-        return res.status(200).send("Login Successful");
+        
+        return res.status(200).json({ message : "Login Successful" ,
+          user : {
+            email ,
+            name : user.name
+          },
+        accessToken, refreshToken});
       }
 
       return res
