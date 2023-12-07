@@ -147,18 +147,14 @@ const authCtrl = {
         const accessToken = await Token.signAccessToken(user.id);
         const refreshToken = await Token.signRefreshToken(user.id);
 
+        // res.status(200).json({ message : "Login Successful"});
+
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
         });
 
-        return res.status(200).json({
-          message: "Login Successful",
-          user: {
-            name: user.name,
-            email: user.email,
-          },
-          accessToken: accessToken,
-        });
+        res.setHeader("Authorization", `Bearer ${accessToken}`);
+        return res.status(200).send("Login Successful");
       }
 
       return res
