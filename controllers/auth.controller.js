@@ -11,23 +11,16 @@ const Joi = require('joi');
 const authCtrl = {
   signUp: async (req, res) => {
     try {
-
-      // array for Errors in validating Signup fields
       const validationErrors = [];
 
       try {
-        // validate email_password_name_Number
-        await authSchema.validateAsync(req.body, { abortEarly: false }); // "abortearly : false" to ensure that it does not abort process after validation fails for one field 
+        await authSchema.validateAsync(req.body, { abortEarly: false });
       } catch (validationErr) {
-        // catches validation errors in validationErr
         console.log(validationErr);
-        // pushing validationErr
         validationErr.details.forEach((error) => {
           validationErrors.push(error.message);
         });
       }
-
-      // Sending a combined error message for all validation errors
       if (validationErrors.length > 0) {
         return res.status(400).json({ errors: validationErrors });
       }
@@ -37,11 +30,12 @@ const authCtrl = {
 
       const user = await User.findOne({ email: email });
 
-      const hashedPassword = await bcryptjs.hash(password, 8); // hashing Password using bcrypt
+      const hashedPassword = await bcryptjs.hash(password, 8);
 
       if (user) {
         if (user.isVerified) {
-         return res.status(409).json({ message: "User already exists" });
+          res.status(409).json({ message: "User already exists" });
+          return;
         } else {
           if (
             !user.verificationToken.expiration ||
@@ -64,10 +58,11 @@ const authCtrl = {
               }
             );
 
-           return res.status(200).json({
-             message: "User updated successfully. Verification Link Sent Again",
-           });
-            
+            res.status(200).json({
+              message:
+                "User updated successfully. Verification Link Sent Again",
+            });
+            return;
           } else {
             res.status(200).json({
               message:
@@ -78,10 +73,7 @@ const authCtrl = {
         }
       }
 
-      // generating verification token for email verfication in database
       const token = crypto.randomBytes(20).toString("hex");
-
-      // attaching verifcation token in Link
       const verificationLink = `https://workshala.onrender.com/verifyEmailPage?token=${token}`;
 
       const newUser = new User({
@@ -91,8 +83,8 @@ const authCtrl = {
         contact: number,
         isVerified: false,
         verificationToken: {
-          token: token, // Token for Email Verification
-          expiration: tokenExpiration, // Token Expiration in 24hrs
+          token: token,
+          expiration: tokenExpiration,
         },
       });
 
@@ -130,7 +122,7 @@ const authCtrl = {
         }
       );
 
-      res.render("emailVerification"); // Rendering the Successful Verification Page
+      res.render("emailVerification");
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: "Internal Server Error" });
@@ -142,25 +134,24 @@ const authCtrl = {
       const user = await User.findOne({ email: email });
 
       if (!user) {
-        res.status(404).json({ message: "User not Found" });
-        return;
+        return res.status(404).json({ message: "User not Found" });
       }
 
       const passwordCheck = await bcryptjs.compare(password, user.password);
 
-      // Checking email verification
       if (!user.isVerified) {
-        res.status(401).json({ message: "Not Verified" });
-        return;
+        return res.status(401).json({ message: "Not Verified" });
       }
 
-      // generating accessToken and refreshToken
-      const accessToken = await Token.signAccessToken(user.id);
-      const refreshToken = await Token.signRefreshToken(user.id);
-
-      // sending basic info
       if (passwordCheck) {
-        res.status(200).json({
+        const accessToken = await Token.signAccessToken(user.id);
+        const refreshToken = await Token.signRefreshToken(user.id);
+
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+        });
+
+        return res.status(200).json({
           message: "Login Successful",
           user: {
             name: user.name,
@@ -168,18 +159,16 @@ const authCtrl = {
           },
           accessToken: accessToken,
         });
-
-        // sending refresh token as a cookie ; 
-        res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-        });
-        return;
       }
-      return res.status(401).json({ success: false, message: "Invalid Credentials" });
+
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid Credentials" });
     } catch (err) {
       return res.status(500).json({ message: "Internal Server Error" });
     }
   },
+
   forgotPassword: async (req, res) => {
     try {
       const { email } = req.body;
@@ -274,7 +263,7 @@ const authCtrl = {
         res.status(400).json({ message: "Bad Request" });
         return;
       }
-      
+
       const userId = await Token.verifyRefreshToken(refToken);
       console.log(refToken);
       const accessToken = await Token.signAccessToken(userId);
@@ -288,7 +277,7 @@ const authCtrl = {
       console.log(error);
       res.status(500).json({ message: "Internal Server Error" });
     }
-  }
+  },
 };
 
 module.exports = { authCtrl };
