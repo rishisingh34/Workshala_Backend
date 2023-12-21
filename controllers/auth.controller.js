@@ -146,11 +146,10 @@ const authCtrl = {
       if (passwordCheck) {
         const accessToken = await Token.signAccessToken(user.id);
         const refreshToken = await Token.signRefreshToken(user.id);
-
-        // res.status(200).json({ message : "Login Successful"});
         res.cookie("accessToken", accessToken, {
           secure : true ,
-          sameSite : 'None' 
+          sameSite : 'None' ,
+          httpOnly : true 
         });
 
         return res.status(200).json({

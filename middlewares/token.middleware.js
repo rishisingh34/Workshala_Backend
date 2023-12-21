@@ -52,35 +52,17 @@ const Token = {
   },
   verifyRefreshToken: async (refToken) => {
     try {
-      // extracting the payload from the refresh token after verification
       const payload = jwt.verify(refToken, process.env.REFRESH_TOKEN_SECRET);
 
-      // Checking if payload contains userId
       if (!payload.aud) {
         throw new Error("Invalid refresh token");
       }
 
-      // Return the userId
       return payload.aud;
     } catch (err) {
-      // Pass the error to the global error handler or handle it appropriately
       throw new Error("Token Verification Failed");
     }
   },
 };
 
 module.exports = {Token};
-
-// check the access token recieved on website ---> jwt.io
-// access token ---> 
-// HEADER : {
-//     "alg" : "HS256",
-//     "typ" : "JWT"
-// }
-
-// PAYLOAD (DATA) : {
-//     "name" : "User's name "
-//     "iat" : 12922121  ---> issued at Date ( )
-// }
-
-// Verify Signature : 

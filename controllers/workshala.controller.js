@@ -1,5 +1,4 @@
 const Job = require("../models/job.model");
-// const User = require("../models/user.model");
 const Profile = require("../models/profile.model");
 const axios = require('axios');
 const Company = require('../models/company.model');
@@ -42,16 +41,11 @@ const workshalaCtrl = {
     },
     updateProfile : async (req, res) => {
         try {
-            // console.log(req.file);
 
-            const localFilePath = req.file.path; // Get the path of the uploaded file
-            // console.log(localFilePath);
-
-            // Upload the file to Cloudinary
+            const localFilePath = req.file.path; 
             const cloudinaryResponse = await uploadOnCloudinary(localFilePath);
             console.log(cloudinaryResponse);
 
-            // Check if file was successfully uploaded to Cloudinary
             if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
               return res
                 .status(500)
