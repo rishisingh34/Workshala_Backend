@@ -1,12 +1,12 @@
 const User = require("../models/user.model");
 const bcryptjs = require("bcryptjs");
 const { Token } = require("../middlewares/token.middleware");
-const { sendmail , sendOtpMail} = require("../utils/mailer.util");
+const { sendmail, sendOtpMail } = require("../utils/mailer.util");
 const Otp = require("../models/otp.model");
 const crypto = require("crypto");
 const tokenExpiration = Date.now() + 24 * 60 * 60 * 1000;
-const authSchema = require('../utils/validationSchema.util');
-const Joi = require('joi');
+const authSchema = require("../utils/validationSchema.util");
+const Joi = require("joi");
 
 const authCtrl = {
   signUp: async (req, res) => {
@@ -149,15 +149,16 @@ const authCtrl = {
 
         // res.status(200).json({ message : "Login Successful"});
         res.cookie("accessToken", accessToken, {
-          httpOnly: true,
+          secure : true ,
+          sameSite : 'None' 
         });
 
-        
-        return res.status(200).json({ message : "Login Successful" ,
-          user : {
-            email ,
-            name : user.name
-          }
+        return res.status(200).json({
+          message: "Login Successful",
+          user: {
+            email,
+            name: user.name,
+          },
         });
       }
 

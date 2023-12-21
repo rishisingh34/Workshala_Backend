@@ -20,7 +20,9 @@ const workshalaCtrl = {
                 await newProfile.save();
             }
 
-            res.status(200).json(req.user);
+            const { verificationToken , password , ...filteredData } = { ...req.user._doc } ;  
+
+            res.status(200).json(filteredData);
 
         }catch(err){
             console.log(err);
