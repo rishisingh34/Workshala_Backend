@@ -135,68 +135,68 @@ const workshalaCtrl = {
         }
     },
 
-    addToCart : async (req, res) => {
-        try {
-            const {jobId} = req.body ;
+    // addToCart : async (req, res) => {
+    //     try {
+    //         const {jobId} = req.body ;
 
-            const userId = req.user.id ;
-            const existingCart = await Cart.findOne({ userId : userId });
+    //         const userId = req.user.id ;
+    //         const existingCart = await Cart.findOne({ userId : userId });
 
-            if(!existingCart){
-                const newCart = new Cart({
-                    userId : userId ,
-                    jobsApplied : [jobId]
-                });               
+    //         if(!existingCart){
+    //             const newCart = new Cart({
+    //                 userId : userId ,
+    //                 jobsApplied : [jobId]
+    //             });               
 
-                await newCart.save();
-            } else {
-                if (!Array.isArray(existingCart.jobsApplied)) {
-                  existingCart.jobsApplied = []; 
-                }
+    //             await newCart.save();
+    //         } else {
+    //             if (!Array.isArray(existingCart.jobsApplied)) {
+    //               existingCart.jobsApplied = []; 
+    //             }
 
-                if (!existingCart.jobsApplied.includes(jobId)) {
-                  existingCart.jobsApplied.push(jobId);
-                  await existingCart.save();
-                } else {
-                  res
-                    .status(400)
-                    .json({ message: "Job is already in the Cart" });
-                  return;
-                }
-            }
+    //             if (!existingCart.jobsApplied.includes(jobId)) {
+    //               existingCart.jobsApplied.push(jobId);
+    //               await existingCart.save();
+    //             } else {
+                  
+    //               return res
+    //                 .status(400)
+    //                 .json({ message: "Job is already in the Cart" });
+    //             }
+    //         }
             
-            const job = await Job.findById(jobId);
+    //         const job = await Job.findById(jobId);
             
-            job.applicants.push(userId);
-            await job.save();
+    //         job.applicants.push(userId);
+    //         await job.save();
 
-            return res.status(201).json({message : "Job Added to Cart Successfully"});           
+    //         return res.status(201).json({message : "Job Added to Cart Successfully"});           
 
 
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({ message : "Internal Server Error"});
-        }
-    },
-    getCartItems : async (req, res) => {
-        try {
-            const userId = req.user.id ;
-            const cart = await Cart.findOne({ userId : userId}).populate('jobsApplied');
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).json({ message : "Internal Server Error"});
+    //     }
+    // },
+    // getCartItems : async (req, res) => {
+    //     try {
+    //         const userId = req.user.id ;
+    //         const cart = await Cart.findOne({ userId : userId}).populate('jobsApplied');
 
-            if( !cart || !cart.jobsApplied.length ) {
-                res.status(404).json({ message: "No Items found in Cart" });
-                return ; 
-            } else{
-                const jobs = cart.jobsApplied;
-                res.status(200).json({ jobs });
-                return ;
-            }
+    //         if( !cart || !cart.jobsApplied.length ) {
+    //             return res.status(404).json({ message: "No Items found in Cart" });
+    //         
+    //         } else{
+    //             const jobs = cart.jobsApplied;
+    //             return res.status(200).json({ jobs });
+    //            
+    //         }
 
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({ message : "Internal Server Error "});
-        }
-    }
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).json({ message : "Internal Server Error "});
+    //     }
+    // }
 };
 
 module.exports = {workshalaCtrl};

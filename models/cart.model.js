@@ -1,17 +1,21 @@
 const mongoose = require('mongoose');
 
 const cartSchema = new mongoose.Schema({
-  userId : {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "users",
   },
-  jobsApplied : [{
-    type : mongoose.Schema.Types.ObjectId,
-    required : true ,
-    ref : "jobs"
-  }]
-  
+  jobsApplied: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "jobs",
+      },
+    ],
+    default : []
+  },
 });
 
 

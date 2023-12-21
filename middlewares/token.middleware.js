@@ -35,16 +35,16 @@ const Token = {
   },
   verifyAccessToken: async (req, res, next) => {
     try {
-      if (!req.headers["authorization"]) {
-        res.status(401).json({ message: "Unauthorized" });
-        return;
+      const token = req.cookies.accessToken;
+
+      if (!token) {
+        return res.status(401).json({ message: "Unauthorized" });
       }
-      const authHeader = req.headers["authorization"];
-      const token = authHeader.split(" ")[1];
+
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
       req.user = await User.findById(decoded.aud).select("-passwd");
-      // console.log(req.user);
+
       next();
     } catch (err) {
       res.status(500).json({ message: "Internal Server Error" });
@@ -52,18 +52,16 @@ const Token = {
   },
   verifyRefreshToken: async (refToken) => {
     try {
-
       // extracting the payload from the refresh token after verification
       const payload = jwt.verify(refToken, process.env.REFRESH_TOKEN_SECRET);
-      
-      // Checking if payload contains userId 
+
+      // Checking if payload contains userId
       if (!payload.aud) {
         throw new Error("Invalid refresh token");
       }
-      
+
       // Return the userId
       return payload.aud;
-
     } catch (err) {
       // Pass the error to the global error handler or handle it appropriately
       throw new Error("Token Verification Failed");

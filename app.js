@@ -4,6 +4,7 @@ const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const cookieParser = require('cookie-parser')
 
 const port = process.env.PORT; 
 const dburl = process.env.dburl; 
@@ -22,6 +23,8 @@ app.use(
     optionsSuccessStatus: 200, // send status code 200 upon success 
   })
 );
+
+app.use(cookieParser());
 
 // Using bodyParser to handle request and responses from client-server 
 app.use(bodyParser.json());
