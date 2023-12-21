@@ -14,7 +14,7 @@ db.on( "error", (error) => console.log(error));
 db.once( "open" , () => console.log("Database Connected")); 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://workshala-eight.vercel.app"],
+    origin: ["http://localhost:5173", "https://workshala-eight.vercel.app", "http://localhost:5174"],
     credentials: true,
     optionsSuccessStatus: 200,
   })
